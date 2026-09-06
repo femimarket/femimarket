@@ -1,0 +1,64 @@
+<resources>
+    <string name="policy_back">Back</string>
+    <string name="policy_updated">Last updated 26 May 2026</string>
+    <string name="legal_title">Privacy, Terms &amp; Legal</string>
+
+    <string-array name="legal_content">
+        <item># 1. Who operates femi</item>
+        <item>femi is operated by EARN $FEMI LTD, a private limited company registered in Scotland, company number SC604284, registered office 63 Dunnock House, Dunnock Road, Dunfermline, Scotland, KY11 8QE, trading as “femi market”. In this document, “we”, “us” and “femi” mean EARN $FEMI LTD. EARN $FEMI LTD is the data controller for the personal data described here.</item>
+        <item># 2. The service</item>
+        <item>femi is software that helps you turn a song you supply into a music video using AI image and video generation. It is provided on an “as is” and “as available” basis through our apps and our website at studio.femi.market. Credits are purchased at earnfemi.com/pay or through the app store on your platform. We do not guarantee that any particular generation, model, output or feature will be available, uninterrupted, or fit for a specific purpose.</item>
+        <item># 3. Accounts</item>
+        <item>You are responsible for activity under your account and for keeping your access secure. You must be old enough to enter into a contract in your jurisdiction to use femi.</item>
+        <item># 4. Credits and payment</item>
+        <item>•  femi is paid for using credits — a prepaid balance you purchase up front; you choose how much.</item>
+        <item>•  Credits are consumed when you generate content. The credit cost of each generation is shown to you before you confirm it.</item>
+        <item>•  Payments are taken through the channel you bought from: Google Play Billing on Android, Apple In-App Purchase on iOS, or our web payment processor at earnfemi.com/pay. We receive a transaction reference and amount; we do not receive or store your full card number.</item>
+        <item>•  Credits have no cash value, are not a deposit, and are non-refundable except as set out in our Refund &amp; Cancellation Policy or where required by law.</item>
+        <item># 5. Your content</item>
+        <item>You keep ownership of the song, lyrics, images and other material you upload. By uploading it you confirm you own it or hold the rights and permissions needed to use it with femi — including rights in the music, in any people shown in reference images, and in any third-party material. You must not upload content that is unlawful, infringing, or that uses another person’s likeness without permission.</item>
+        <item># 6. Generated output</item>
+        <item>AI-generated output is produced by automated systems and may be imperfect or unexpected. You are responsible for reviewing output and for how you use, publish or distribute it. We make no warranty that output is original, non-infringing, or cleared for any particular commercial use, and you are responsible for any clearances your release requires.</item>
+        <item># 7. What personal data we collect</item>
+        <item>•  Account information — the identifier you sign in with (such as an email address or a sign-in provider’s user ID) and a session token used to keep you signed in.</item>
+        <item>•  Content you upload — the song audio, lyrics, reference images and any prompts or settings you supply to generate a music video.</item>
+        <item>•  Generated output — the images, video and audio that femi produces from your inputs, along with the credit cost of each generation.</item>
+        <item>•  Purchase and credit records — the date and amount of credit purchases and consumption, and a transaction reference issued by the relevant payment channel (Google Play, Apple, or the web payment processor). We do not receive or store full card numbers.</item>
+        <item>•  Technical data — basic request metadata needed to operate the service, such as IP address, device type, app version, and error logs.</item>
+        <item>femi does not request access to your contacts, precise location, microphone, or camera. Mobile apps request only the permissions their platform requires to process in-app purchases.</item>
+        <item># 8. How we use your data</item>
+        <item>•  To provide the service — sign you in, run generations, deliver and store your output.</item>
+        <item>•  To take payment and track your credit balance.</item>
+        <item>•  To diagnose errors, prevent abuse, and improve reliability.</item>
+        <item>•  To comply with legal obligations (tax, accounting, lawful requests).</item>
+        <item>We do not sell your personal data. We do not use your uploaded content or generated output to train our own AI models.</item>
+        <item># 9. Legal basis (UK/EU GDPR)</item>
+        <item>We process your data on the basis of (a) performance of a contract when you use femi or buy credits, (b) our legitimate interests in running and securing the service, and (c) legal obligation where applicable.</item>
+        <item># 10. Sharing &amp; third-party providers</item>
+        <item>To deliver generations, your inputs (song audio, images, prompts) are sent to third-party AI model and infrastructure providers. These providers process the content on our behalf to produce the requested output. Payment processing is handled by Google Play (Android), Apple (iOS), and our web payment processor. Service hosting and storage are provided by cloud infrastructure providers. We share only what each provider needs to perform its function. We do not sell your personal data to third parties.</item>
+        <item># 11. International transfers</item>
+        <item>Some providers are located outside the UK/EEA. Where personal data is transferred internationally, we rely on appropriate safeguards such as the UK International Data Transfer Agreement or EU Standard Contractual Clauses.</item>
+        <item># 12. Retention</item>
+        <item>We keep your account information and credit records for as long as your account exists and for a reasonable period afterwards to meet legal and accounting obligations. Uploaded content and generated output are retained while linked to your account; you can delete individual items at any time. Backups and logs are rotated on a rolling basis.</item>
+        <item># 13. Your rights</item>
+        <item>Subject to applicable law, you have the right to access, correct, delete, restrict, or object to the processing of your personal data, and to data portability. To exercise any of these rights, use our contact form. You also have the right to complain to your local data protection authority — in the UK, the Information Commissioner’s Office (ico.org.uk).</item>
+        <item># 14. Account &amp; data deletion</item>
+        <item>You can request deletion of your femi account and associated personal data at any time by writing to us via the contact form. We will delete or anonymise your data within a reasonable period, except where we are required to retain certain records for legal, tax or fraud-prevention purposes.</item>
+        <item># 15. Children</item>
+        <item>femi is not directed at children. You must be old enough to enter into a contract in your jurisdiction to use femi. We do not knowingly collect personal data from children. If you believe a child has provided us with personal data, contact us and we will delete it.</item>
+        <item># 16. Security</item>
+        <item>We use industry-standard measures to protect your data in transit (HTTPS/TLS) and at rest. No system is perfectly secure; you are responsible for keeping your sign-in credentials confidential.</item>
+        <item># 17. Refunds and cancellations</item>
+        <item>Credits are non-refundable once purchased, except where required by law or where set out in our Refund &amp; Cancellation Policy, which forms part of these terms.</item>
+        <item># 18. Acceptable use</item>
+        <item>You agree not to use femi to create content that is illegal, harmful, harassing, deceptive, or that infringes others’ rights, and not to attempt to disrupt or reverse-engineer the service.</item>
+        <item># 19. Limitation of liability</item>
+        <item>To the fullest extent permitted by law, we are not liable for indirect or consequential loss, loss of profit, or loss of data arising from your use of femi. Nothing in this document excludes liability that cannot be excluded by law, including your non-excludable statutory consumer rights.</item>
+        <item># 20. Changes</item>
+        <item>We may update this document or the service from time to time. Material changes will be shown on this page with an updated date.</item>
+        <item># 21. Governing law</item>
+        <item>This document is governed by the law of Scotland, and the Scottish courts have jurisdiction, without affecting any mandatory consumer protections of your country of residence.</item>
+        <item># 22. Contact</item>
+        <item>Questions about this document, your data, or anything else: use our contact form. EARN $FEMI LTD, 63 Dunnock House, Dunnock Road, Dunfermline, Scotland, KY11 8QE.</item>
+    </string-array>
+</resources>

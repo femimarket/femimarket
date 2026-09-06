@@ -1,0 +1,9 @@
+[package]
+name = "id3-extract-image"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { workspace = true }
+id3 = { workspace = true }
+infer = { workspace = true }

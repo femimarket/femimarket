@@ -1,0 +1,230 @@
+{{>licenseInfo}}
+package {{apiPackage}}
+
+{{#imports}}import {{import}}
+{{/imports}}
+
+import {{packageName}}.infrastructure.*
+import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.request.forms.FormBuilder
+import io.ktor.client.request.forms.FormPart
+import io.ktor.client.request.forms.InputProvider
+import io.ktor.client.request.forms.formData
+import io.ktor.client.engine.HttpClientEngine
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.encodeToJsonElement
+import io.ktor.http.ParametersBuilder
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.ContentType
+import io.ktor.http.content.PartData
+import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.encoding.*
+
+/**
+ * Recursively appends a value as bracket-keyed multipart form fields,
+ * matching the wire format expected by serde_qs on the rust server.
+ *
+ * `files` is the per-call registry the caller passes on multipart operations
+ * whose server-side `x-form-file-fields` vendor extension is non-empty. At
+ * each JSON leaf the walker checks whether the leaf's *string value* is a
+ * key in this map. If yes, it emits a streaming `FormPart` carrying the
+ * matching `MultipartFileSource.provider` — bytes flow lazily through Ktor
+ * during the upload. If no (or `files` is null), the leaf is appended as
+ * plain text exactly as before, so non-file leaves and operations without a
+ * registry are unaffected.
+ *
+ * Matching by leaf string value (typically a filename) lets nested file
+ * leaves like `upsert[data][0][audio]` work without surfacing per-field
+ * routing in the signature — the model field stays `String` (filename), the
+ * caller hands in `mapOf("audio.mp3" to MultipartFileSource(...))`, and the
+ * walker reconnects them at upload time.
+ */
+private inline fun <reified T : Any> FormBuilder.appendBracket(
+    baseName: String,
+    value: T,
+    files: Map<String, MultipartFileSource>? = null,
+    textFieldsOut: MutableMap<String, String>? = null,
+    fileFieldsOut: MutableMap<String, MultipartFileSource>? = null,
+) {
+    appendBracketWalk(baseName, Json.Default.encodeToJsonElement(value), files, textFieldsOut, fileFieldsOut)
+}
+
+/**
+ * Walks the JSON tree emitting Ktor `FormPart`s (default engine path). While
+ * walking it also mirrors each leaf into flat text/file maps if the caller
+ * passed writable ones — those flat maps are what
+ * [MultipartStreamingHook.configure] consumes on browser targets to build a
+ * native `FormData` and stream via `fetchOptions`. Non-browser targets ignore
+ * the flat maps; Ktor's default engine handles the `FormPart` output directly.
+ */
+private fun FormBuilder.appendBracketWalk(
+    prefix: String,
+    el: JsonElement,
+    files: Map<String, MultipartFileSource>?,
+    textFieldsOut: MutableMap<String, String>?,
+    fileFieldsOut: MutableMap<String, MultipartFileSource>?,
+) {
+    when (el) {
+        is JsonNull -> return
+        is JsonPrimitive -> {
+            val src = files?.get(el.content)
+            if (src != null) {
+                append(
+                    FormPart(
+                        prefix,
+                        src.provider,
+                        Headers.build {
+                            append(
+                                HttpHeaders.ContentDisposition,
+                                "form-data; name=\"$prefix\"; filename=\"${src.filename}\"",
+                            )
+                            append(HttpHeaders.ContentType, src.contentType.toString())
+                        },
+                    ),
+                )
+                fileFieldsOut?.put(prefix, src)
+            } else {
+                append(prefix, el.content)
+                textFieldsOut?.put(prefix, el.content)
+            }
+        }
+        is JsonArray -> el.forEachIndexed { i, v -> appendBracketWalk("$prefix[$i]", v, files, textFieldsOut, fileFieldsOut) }
+        is JsonObject -> el.forEach { (k, v) -> appendBracketWalk("$prefix[$k]", v, files, textFieldsOut, fileFieldsOut) }
+    }
+}
+
+{{#operations}}
+{{#nonPublicApi}}internal {{/nonPublicApi}}{{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}open class {{classname}} : ApiClient {
+
+    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}constructor(
+        baseUrl: String = ApiClient.BASE_URL,
+        httpClientEngine: HttpClientEngine? = null,
+        httpClientConfig: ((HttpClientConfig<*>) -> Unit)? = null,
+        jsonSerializer: Json = ApiClient.JSON_DEFAULT
+    ) : super(baseUrl = baseUrl, httpClientEngine = httpClientEngine, httpClientConfig = httpClientConfig, jsonBlock = jsonSerializer)
+
+    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}constructor(
+        baseUrl: String,
+        httpClient: HttpClient
+    ): super(baseUrl = baseUrl, httpClient = httpClient)
+
+    {{#operation}}
+    {{#allParams}}
+    {{#isEnum}}
+
+    /**
+     * enum for parameter {{paramName}}
+     */
+    @Serializable
+    {{#nonPublicApi}}internal {{/nonPublicApi}}{{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}enum class {{enumName}}{{operationIdCamelCase}}({{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}val value: {{^isContainer}}{{dataType}}{{/isContainer}}{{#isContainer}}kotlin.String{{/isContainer}}) {
+    {{^enumUnknownDefaultCase}}
+        {{#allowableValues}}{{#enumVars}}
+        @SerialName(value = {{^isString}}"{{/isString}}{{{value}}}{{^isString}}"{{/isString}})
+        {{&name}}({{{value}}}){{^-last}},{{/-last}}
+        {{/enumVars}}{{/allowableValues}}
+    {{/enumUnknownDefaultCase}}
+    {{#enumUnknownDefaultCase}}
+        {{#allowableValues}}{{#enumVars}}{{^-last}}
+        @SerialName(value = {{^isString}}"{{/isString}}{{{value}}}{{^isString}}"{{/isString}})
+        {{&name}}({{{value}}}),
+        {{/-last}}{{/enumVars}}{{/allowableValues}}
+    {{/enumUnknownDefaultCase}}
+    }
+
+    {{/isEnum}}
+    {{/allParams}}
+    /**
+     * {{summary}}
+     * {{notes}}
+    {{#allParams}} * @param {{{paramName}}} {{description}}{{^required}} (optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}{{/required}}
+    {{/allParams}} * @return {{{returnType}}}{{^returnType}}void{{/returnType}}
+     */
+    {{#returnType}}
+    @Suppress("UNCHECKED_CAST")
+    {{/returnType}}
+    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}open suspend fun {{operationId}}({{#allParams}}{{{paramName}}}: {{#isEnum}}{{#isContainer}}kotlin.collections.List<{{enumName}}{{operationIdCamelCase}}>{{/isContainer}}{{^isContainer}}{{enumName}}{{operationIdCamelCase}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{#required}}{{#defaultValue}} = {{^isNumber}}{{#isEnum}}{{enumName}}{{operationIdCamelCase}}.{{&enumDefaultValue}}{{/isEnum}}{{^isEnum}}{{{defaultValue}}}{{/isEnum}}{{/isNumber}}{{#isNumber}}{{{defaultValue}}}.toDouble(){{/isNumber}}{{/defaultValue}}{{/required}}{{^required}}?{{#defaultValue}} = {{^isNumber}}{{#isEnum}}{{enumName}}{{operationIdCamelCase}}.{{&enumDefaultValue}}{{/isEnum}}{{^isEnum}}{{{defaultValue}}}{{/isEnum}}{{/isNumber}}{{#isNumber}}{{{defaultValue}}}.toDouble(){{/isNumber}}{{/defaultValue}}{{^defaultValue}} = null{{/defaultValue}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#hasFormParams}}{{#isMultipart}}, files: Map<String, MultipartFileSource>? = null{{/isMultipart}}{{/hasFormParams}}): HttpResponse<{{{returnType}}}{{^returnType}}Unit{{/returnType}}> {
+
+        val localVariableAuthNames = listOf<String>({{#authMethods}}"{{name}}"{{^-last}}, {{/-last}}{{/authMethods}})
+
+        {{^hasBodyParam}}{{#hasFormParams}}{{#isMultipart}}
+        // Flat mirrors consumed by MultipartStreamingHook.configure on browser
+        // targets. Filled by the walker below alongside its FormPart emissions.
+        // Non-browser targets ignore them.
+        val localVariableTextFields = mutableMapOf<String, String>()
+        val localVariableFileFields = mutableMapOf<String, MultipartFileSource>()
+        {{/isMultipart}}{{/hasFormParams}}{{/hasBodyParam}}
+        val localVariableBody = {{#hasBodyParam}}{{#bodyParam}}{{#isArray}}{{operationIdCamelCase}}Request({{{paramName}}}{{^isList}}.asList(){{/isList}}){{/isArray}}{{^isArray}}{{#isMap}}{{operationIdCamelCase}}Request({{{paramName}}}){{/isMap}}{{^isMap}}{{{paramName}}}{{/isMap}}{{/isArray}}{{/bodyParam}}{{/hasBodyParam}}
+            {{^hasBodyParam}}
+            {{#hasFormParams}}
+            {{#isMultipart}}
+            formData {
+                {{#formParams}}
+                {{#isFile}}
+                {{{paramName}}}?.apply { append({{{baseName}}}) }
+                {{/isFile}}
+                {{^isFile}}
+                {{{paramName}}}?.let { appendBracket("{{{baseName}}}", it, files, localVariableTextFields, localVariableFileFields) }
+                {{/isFile}}
+                {{/formParams}}
+            }
+            {{/isMultipart}}
+            {{^isMultipart}}
+            ParametersBuilder().also {
+                {{#formParams}}
+                {{{paramName}}}?.apply { it.append("{{{baseName}}}", {{{paramName}}}.toString()) }
+                {{/formParams}}
+            }.build()
+            {{/isMultipart}}
+            {{/hasFormParams}}
+            {{^hasFormParams}}
+            io.ktor.client.utils.EmptyContent
+            {{/hasFormParams}}
+            {{/hasBodyParam}}
+
+        val localVariableQuery = mutableMapOf<String, List<String>>(){{#queryParams}}
+        {{{paramName}}}?.apply { localVariableQuery["{{baseName}}"] = {{#isContainer}}toMultiValue(this, "{{collectionFormat}}"){{/isContainer}}{{^isContainer}}listOf({{^isEnumOrRef}}"${{{paramName}}}"{{/isEnumOrRef}}{{#isEnumOrRef}}"${ {{paramName}}.value }"{{/isEnumOrRef}}){{/isContainer}} }{{/queryParams}}
+        val localVariableHeaders = mutableMapOf<String, String>(){{#headerParams}}
+        {{{paramName}}}?.apply { localVariableHeaders["{{baseName}}"] = {{#isContainer}}this.joinToString(separator = collectionDelimiter("{{collectionFormat}}")){{/isContainer}}{{^isContainer}}this.toString(){{/isContainer}} }{{/headerParams}}
+
+        val localVariableConfig = RequestConfig<kotlin.Any?>(
+            RequestMethod.{{httpMethod}},
+            "{{{path}}}"{{#pathParams}}.replace("{" + "{{baseName}}" + "}", {{#isContainer}}{{paramName}}.joinToString(","){{/isContainer}}{{^isContainer}}{{^isEnumOrRef}}"${{{paramName}}}"{{/isEnumOrRef}}{{#isEnumOrRef}}"${ {{paramName}}.value }"{{/isEnumOrRef}}{{/isContainer}}){{/pathParams}},
+            query = localVariableQuery,
+            headers = localVariableHeaders,
+            requiresAuthentication = {{#hasAuthMethods}}true{{/hasAuthMethods}}{{^hasAuthMethods}}false{{/hasAuthMethods}},
+        )
+
+        return {{#hasBodyParam}}jsonRequest{{/hasBodyParam}}{{^hasBodyParam}}{{#hasFormParams}}{{#isMultipart}}multipartFormRequest{{/isMultipart}}{{^isMultipart}}urlEncodedFormRequest{{/isMultipart}}{{/hasFormParams}}{{^hasFormParams}}request{{/hasFormParams}}{{/hasBodyParam}}(
+            localVariableConfig,
+            localVariableBody,
+            localVariableAuthNames{{^hasBodyParam}}{{#hasFormParams}}{{#isMultipart}},
+            textFields = localVariableTextFields,
+            fileFields = localVariableFileFields{{/isMultipart}}{{/hasFormParams}}{{/hasBodyParam}}
+        ).{{#isArray}}wrap<{{operationIdCamelCase}}Response>().map { value{{^isList}}.toTypedArray(){{/isList}} }{{/isArray}}{{^isArray}}{{#isMap}}wrap<{{operationIdCamelCase}}Response>().map { value }{{/isMap}}{{^isMap}}wrap(){{/isMap}}{{/isArray}}
+    }
+
+{{#hasBodyParam}}
+{{#bodyParam}}
+{{#isArray}}{{>serial_wrapper_request_list}}{{/isArray}}{{#isMap}}{{>serial_wrapper_request_map}}{{/isMap}}
+{{/bodyParam}}
+{{/hasBodyParam}}
+{{#isArray}}
+{{>serial_wrapper_response_list}}
+
+{{/isArray}}
+{{#isMap}}
+{{>serial_wrapper_response_map}}
+
+{{/isMap}}
+
+    {{/operation}}
+}
+{{/operations}}

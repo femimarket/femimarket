@@ -1,0 +1,9 @@
+[package]
+name = "chat-service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+matrix-sdk = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }

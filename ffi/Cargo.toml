@@ -1,0 +1,120 @@
+[package]
+name = "ffi"
+version = "0.1.0"
+edition = "2024"
+
+# The PORTABLE metadata engine PLUS the STATEFUL kira audio engine, folded into
+# ONE crate. metadata-core is now the SINGLE native crate owning BOTH the metadata
+# FFI (id3/infer/xmp) and the audio-playback FFI (the former `audio-engine` crate,
+# dissolved in here) — one artifact, one JNI class, one cinterop. The portable
+# logic (id3_ops / infer_ops, and the binding-agnostic `audio_ops::AudioEngine`) stays
+# binding-agnostic; the id3/infer logic is ALSO consumed as an `rlib` by the web
+# `wasm-*` crates (which pull id3/infer directly and are built separately by
+# wasm-pack — the audio module is NOT on the web path, kira/cpal do not build for
+# wasm32). The native bindings live INSIDE this crate as cfg-gated modules so there
+# is a single source of truth and a single artifact name (libmetadata_core.{so,dylib,a}):
+#   - src/jni.rs   — metadata + audio JVM + Android JNI shim (cfg: not wasm32, not iOS)
+#   - src/capi.rs  — metadata + audio iOS C-ABI shim         (cfg: iOS only)
+# The audio FFI is folded INTO those two flat shims (the former src/audio/{jni,capi}.rs);
+# the portable engine ops live in src/audio_ops.rs alongside id3_ops.rs / infer_ops.rs.
+# The metadata AND audio JNI shims both export `Java_market_femi_Ffi_*`
+# symbols (ONE JNI class, `market.femi.Ffi`); the C-ABI shims export
+# `md_*` (metadata) and `ae_*` (audio) into ONE cinterop header (metadata_ffi.h,
+# package `metadata.ffi`) — the same one that already carries the `mc_*`
+# decode-to-PCM surface. The web shim still lives OUT of tree in wasm-id3 /
+# wasm-infer, via `#[wasm_bindgen]`, and only ever uses the rlib output of this crate.
+#
+# crate-type rationale:
+#   rlib      — so the wasm-* crates (and any future Rust consumer) can link the
+#               portable logic; also what cargo uses for the workspace's own deps.
+#   cdylib    — the JVM/Android artifact loaded via System.loadLibrary("metadata_core")
+#               (Android packages it into jniLibs/<abi>/libmetadata_core.so).
+#   staticlib — the iOS artifact (libmetadata_core.a) static-linked into the
+#               Kotlin/Native framework and reached from commonMain via cinterop.
+#
+[lib]
+crate-type = ["rlib", "cdylib", "staticlib"]
+
+[dependencies]
+id3 = "1"
+infer = { version = "0.19.0", default-features = false }
+xmpkit = { version = "0.1.0", features = ["wasm"] }
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+# ── audio deps (folded in from the former standalone `audio-engine` crate) ────
+#
+# The audio-engine crate was DISSOLVED into metadata-core so there is ONE native
+# crate / ONE artifact (libmetadata_core.{so,dylib,a,dll}) owning BOTH the
+# metadata FFI (id3/infer/xmp) and the kira playback FFI (folded into src/jni.rs +
+# src/capi.rs, portable engine in src/audio_ops.rs). These are
+# the kira playback engine's pins, reconciled with the metadata decode-to-PCM
+# needs into a SINGLE dependency set (this SUPERSEDES [ADV2-AUDIO-CRATE-NAME]'s
+# separate-crate decision and DISSOLVES the earlier symphonia-feature-split and
+# cpal-version-unification gaps, which only existed because two crates ran cargo
+# separately and therefore did NOT feature-unify):
+#
+#   - kira 0.12 (0.12.2) is the stateful playback engine. We rely on KIRA'S OWN
+#     default `cpal` backend feature for the OS audio device — there is NO second
+#     standalone `cpal` dependency and NO `android_aaudio` feature (that feature
+#     does not exist in kira 0.12's transitive cpal 0.18.1; Android AAudio is
+#     automatic via `ndk 0.9` api-level-26). One crate → one cpal, so the former
+#     "cpal version unification" gap is moot.
+#
+#   - symphonia is now declared EXACTLY ONCE for the whole crate, with the `all`
+#     feature superset. Because metadata-core is a single cargo build, this ONE
+#     feature set covers BOTH consumers with no split: (a) kira's decode path
+#     (kira 0.12 reads its transitive symphonia), and (b) metadata-core's own
+#     offline `decode_to_16k_mono_f32` (decode-to-16k-mono-PCM, [ADV5-DECODE-TO-
+#     PCM-FFI], lands in M4/U51) — `all` is a strict superset of that explicit
+#     codec list, so the former "symphonia feature split" gap is dissolved.
+#     (rubato, the U51 resampler, is added in the SAME unit that wires the real
+#     decode_to_16k_mono_f32 body; the audio module is a scaffold here.)
+kira = "0.12"
+symphonia = { version = "0.5", features = ["all"] }
+# The U51 resampler: rubato's SincFixedIn does the fixed-ratio srcRate→16000
+# sinc resample in decode_ops.rs (the [MC-09] quality-over-latency batch path).
+# Pure Rust, no system deps, builds for every native triple.
+rubato = "0.16"
+
+# The U50 engine's sound storage: audio_ops.rs keeps the decoded
+# StaticSoundData sounds in a SlotMap (the settled engine shape from the
+# scaffold docs/[AE-02]). Pure Rust, no system deps.
+slotmap = "1"
+
+# The JNI crate is needed ONLY by the JVM/Android binding (src/jni.rs), so it is
+# gated to exactly the same cfg as that module: every non-wasm, non-iOS target
+# (desktop host builds it too, which is how the host acceptance build links the
+# JNI symbols). iOS and the wasm-* web builds never pull `jni` in.
+[target.'cfg(all(not(target_arch = "wasm32"), not(target_os = "ios")))'.dependencies]
+jni = "0.21"
+
+# ── video frame extraction (Android only: MediaExtractor/MediaCodec via ndk) ───
+[target.'cfg(target_os = "android")'.dependencies]
+ndk = { version = "0.9", features = ["media"] }
+ndk-sys = "0.6"
+
+# ── the SeaORM db layer (native-only: sea-orm/sqlx do not build on wasm32) ────
+[target.'cfg(all(not(target_arch = "wasm32")))'.dependencies]
+# sqlx-sqlite (NOT postgres): the db repo is the ON-DEVICE store for
+# android/desktop/ios — one SQLite file in the app's data dir. sqlx bundles
+# libsqlite3-sys, so the NDK/iOS toolchains compile SQLite in; no system dep.
+# schema-sync + entity-registry: `db.get_schema_builder().register(..).sync(db)`
+# creates missing tables/columns non-destructively at db init (sql/db.rs).
+sea-orm = { version = "2.0.0-rc", features = ["sqlx-sqlite", "runtime-tokio", "macros", "entity-registry", "schema-sync"] }
+# The FFI surface is synchronous (JNI + C-ABI); ONE global tokio runtime drives
+# SeaORM's async ops via block_on at the boundary (sql/db.rs).
+tokio = { version = "1", features = ["rt-multi-thread", "time", "sync"] }
+strum = "0.27"
+strum_macros = "0.27"
+
+# ── video frame extraction (iOS only: AVFoundation / CoreVideo via objc2) ────
+[target.'cfg(target_os = "ios")'.dependencies]
+objc2 = "0.6"
+objc2-foundation = "0.3"
+objc2-av-foundation = { version = "0.3", features = ["objc2-core-media"] }
+objc2-core-media = "0.3"
+objc2-core-video = "0.3"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"

@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS care.activities (
+    id VARCHAR(255) NOT NULL PRIMARY KEY
+);

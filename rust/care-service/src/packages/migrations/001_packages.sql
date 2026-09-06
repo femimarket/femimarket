@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS care.packages (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    client_id INT NOT NULL,
+    monday BOOLEAN NOT NULL,
+    tuesday BOOLEAN NOT NULL,
+    wednesday BOOLEAN NOT NULL,
+    thursday BOOLEAN NOT NULL,
+    friday BOOLEAN NOT NULL,
+    saturday BOOLEAN NOT NULL,
+    sunday BOOLEAN NOT NULL,
+    morning BOOLEAN NOT NULL,
+    lunch BOOLEAN NOT NULL,
+    tea BOOLEAN NOT NULL,
+    evening BOOLEAN NOT NULL,
+    night BOOLEAN NOT NULL,
+    note VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_note VARCHAR(255) NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (client_id) REFERENCES care.clients (id),
+    FOREIGN KEY (user_id) REFERENCES care.users (id)
+);

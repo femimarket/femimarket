@@ -1,0 +1,103 @@
+{{!
+  Custom oneOf renderer for the kotlinx-serialization multiplatform client.
+
+  Reached when generateOneOfAnyOfWrappers=true (see build.sh) and the model is a
+  oneOf. Renders the union as a type-safe sealed interface plus a hand-rolled
+  KSerializer — instead of the stock output, which flattens every variant into
+  one data class (broken) or yields an `actualInstance: Any?` wrapper.
+
+  Two modes, chosen by whether the spec carries an OpenAPI discriminator:
+
+  * WITH discriminator (Rust: `#[serde(untagged)]` enum + `#[schema(discriminator(
+    property_name = "...", mapping(...)))]`, ref variants `Variant(NamedStruct)`):
+    O(1) dispatch — read the discriminator field, decode the mapped variant.
+
+  * WITHOUT discriminator (Rust: `#[serde(tag = "...")]` enum with inline struct
+    variants): trial decode — try each variant until one parses. Correct and safe
+    because every variant carries the tag as a single-value enum that gates the
+    trial. Give each variant a `#[schema(title = "...")]` so the generated types
+    get clean names instead of <Parent>OneOf.
+
+  Wrapper subtypes are named <Type>Case to avoid colliding with the variant data
+  class of the same name.
+}}
+import kotlin.jvm.JvmInline
+import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.encoding.*
+import kotlinx.serialization.json.*
+
+/**
+ * {{{description}}}
+ * oneOf union rendered as a type-safe sealed interface.
+ */
+@Serializable(with = {{classname}}Serializer::class)
+sealed interface {{classname}} {
+{{#discriminator}}
+{{#discriminator.mappedModels}}
+    @JvmInline
+    value class {{modelName}}Case(val value: {{modelName}}) : {{classname}}
+{{/discriminator.mappedModels}}
+{{/discriminator}}
+{{^discriminator}}
+{{#composedSchemas}}
+{{#oneOf}}
+    @JvmInline
+    value class {{{dataType}}}Case(val value: {{{dataType}}}) : {{classname}}
+{{/oneOf}}
+{{/composedSchemas}}
+{{/discriminator}}
+}
+
+object {{classname}}Serializer : KSerializer<{{classname}}> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("{{classname}}")
+
+    override fun serialize(encoder: Encoder, value: {{classname}}) {
+        require(encoder is JsonEncoder) { "{{classname}} can only be serialized with Json" }
+        val element = when (value) {
+{{#discriminator}}
+{{#discriminator.mappedModels}}
+            is {{classname}}.{{modelName}}Case -> {
+                val map = encoder.json.encodeToJsonElement({{modelName}}.serializer(), value.value).jsonObject.toMutableMap()
+                map["{{discriminator.propertyBaseName}}"] = JsonPrimitive("{{mappingName}}")
+                JsonObject(map)
+            }
+{{/discriminator.mappedModels}}
+{{/discriminator}}
+{{^discriminator}}
+{{#composedSchemas}}
+{{#oneOf}}
+            is {{classname}}.{{{dataType}}}Case -> encoder.json.encodeToJsonElement({{{dataType}}}.serializer(), value.value)
+{{/oneOf}}
+{{/composedSchemas}}
+{{/discriminator}}
+        }
+        encoder.encodeJsonElement(element)
+    }
+
+    override fun deserialize(decoder: Decoder): {{classname}} {
+        require(decoder is JsonDecoder) { "{{classname}} can only be deserialized with Json" }
+{{#discriminator}}
+        val obj = decoder.decodeJsonElement().jsonObject
+        val discriminator = obj["{{discriminator.propertyBaseName}}"]?.jsonPrimitive?.content
+            ?: throw SerializationException("Missing discriminator '{{discriminator.propertyBaseName}}' for {{classname}}")
+        return when (discriminator) {
+{{#discriminator.mappedModels}}
+            "{{mappingName}}" -> {{classname}}.{{modelName}}Case(decoder.json.decodeFromJsonElement({{modelName}}.serializer(), obj))
+{{/discriminator.mappedModels}}
+            else -> throw SerializationException("Unknown {{discriminator.propertyBaseName}} '$discriminator' for {{classname}}")
+        }
+{{/discriminator}}
+{{^discriminator}}
+        val element = decoder.decodeJsonElement()
+        val errors = mutableListOf<String>()
+{{#composedSchemas}}
+{{#oneOf}}
+        try { return {{classname}}.{{{dataType}}}Case(decoder.json.decodeFromJsonElement({{{dataType}}}.serializer(), element)) }
+        catch (e: Exception) { errors.add("{{{dataType}}}: ${e.message}") }
+{{/oneOf}}
+{{/composedSchemas}}
+        throw SerializationException("Cannot deserialize {{classname}}; tried each variant: $errors")
+{{/discriminator}}
+    }
+}

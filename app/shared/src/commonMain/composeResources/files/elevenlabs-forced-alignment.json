@@ -1,0 +1,286 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ElevenLabs API Documentation",
+    "description": "This is the documentation for the ElevenLabs API. You can use this API to use our service programmatically, this is done by using your API key. You can find your API key in the dashboard at https://elevenlabs.io/app/settings/api-keys.",
+    "version": "1.0"
+  },
+  "paths": {
+    "/v1/forced-alignment": {
+      "post": {
+        "tags": [
+          "forced-alignment"
+        ],
+        "summary": "Create Forced Alignment",
+        "description": "Force align an audio file to text. Use this endpoint to get the timing information for each character and word in an audio file based on a provided text transcript.",
+        "operationId": "forced_alignment",
+        "parameters": [
+          {
+            "name": "xi-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Your API key. This is required by most endpoints to access our API programmatically. You can view your xi-api-key using the 'Profile' tab on the website.",
+              "title": "Xi-Api-Key"
+            },
+            "description": "Your API key. This is required by most endpoints to access our API programmatically. You can view your xi-api-key using the 'Profile' tab on the website."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_Create_forced_alignment_v1_forced_alignment_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForcedAlignmentResponseModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-sdk-group-name": "forced_alignment",
+        "x-fern-sdk-method-name": "create"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ForcedAlignmentCharacterResponseModel": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "The character that was transcribed."
+          },
+          "start": {
+            "type": "number",
+            "title": "Start",
+            "description": "The start time of the character in seconds."
+          },
+          "end": {
+            "type": "number",
+            "title": "End",
+            "description": "The end time of the character in seconds."
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "start",
+          "end"
+        ],
+        "title": "ForcedAlignmentCharacterResponseModel",
+        "description": "Model representing a single character with its timing information from the aligner."
+      },
+      "ForcedAlignmentResponseModel": {
+        "properties": {
+          "characters": {
+            "items": {
+              "$ref": "#/components/schemas/ForcedAlignmentCharacterResponseModel"
+            },
+            "type": "array",
+            "title": "Characters",
+            "description": "List of characters with their timing information."
+          },
+          "words": {
+            "items": {
+              "$ref": "#/components/schemas/ForcedAlignmentWordResponseModel"
+            },
+            "type": "array",
+            "title": "Words",
+            "description": "List of words with their timing information."
+          },
+          "loss": {
+            "type": "number",
+            "title": "Loss",
+            "description": "The average alignment loss/confidence score for the entire transcript, calculated from all characters."
+          }
+        },
+        "type": "object",
+        "required": [
+          "characters",
+          "words",
+          "loss"
+        ],
+        "title": "ForcedAlignmentResponseModel",
+        "description": "Model representing the response from the aligner service."
+      },
+      "ForcedAlignmentWordResponseModel": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "The word that was transcribed."
+          },
+          "start": {
+            "type": "number",
+            "title": "Start",
+            "description": "The start time of the word in seconds."
+          },
+          "end": {
+            "type": "number",
+            "title": "End",
+            "description": "The end time of the word in seconds."
+          },
+          "loss": {
+            "type": "number",
+            "title": "Loss",
+            "description": "The average alignment loss/confidence score for this word, calculated from its constituent characters."
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "start",
+          "end",
+          "loss"
+        ],
+        "title": "ForcedAlignmentWordResponseModel",
+        "description": "Model representing a single word with its timing information from the aligner."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Body_Create_forced_alignment_v1_forced_alignment_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File",
+            "description": "The file to align. All major audio formats are supported. The file size must be less than 1GB."
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "The text to align with the audio. The input text can be in any format, however diarization is not supported at this time."
+          },
+          "enabled_spooled_file": {
+            "type": "boolean",
+            "title": "Enabled Spooled File",
+            "description": "If true, the file will be streamed to the server and processed in chunks. This is useful for large files that cannot be loaded into memory. The default is false.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "text"
+        ],
+        "title": "Body_Create_forced_alignment_v1_forced_alignment_post"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "text-to-speech",
+      "description": "Convert text into lifelike speech using a voice of your choice."
+    },
+    {
+      "name": "speech-to-speech",
+      "description": "Create speech by combining the style and content of an audio file you upload with a voice of your choice."
+    },
+    {
+      "name": "speech-to-text",
+      "description": "Transcribe your audio files with detailed speaker annotations and precise timestamps using our cutting-edge model."
+    },
+    {
+      "name": "forced-alignment",
+      "description": "Force align an audio file to a text transcript to get precise word-level and character level timing information. Response is a list of characters with their start and end times as milliseconds elapsed from the start of the recording."
+    },
+    {
+      "name": "models",
+      "description": "Access the different models of the platform."
+    },
+    {
+      "name": "voices",
+      "description": "Access to voices created either by you or ElevenLabs."
+    },
+    {
+      "name": "samples",
+      "description": "Access to your samples. A sample is any audio file you attached to a voice. A voice can have one or more samples."
+    },
+    {
+      "name": "speech-history",
+      "description": "Accesses your speech history. Your speech history is a list of all your created audio including its metadata using our text-to-speech and speech-to-speech models."
+    },
+    {
+      "name": "studios",
+      "description": "Access, create and convert Studio Projects programmatically, only specifically whitelisted accounts can access the Studio API. If you need access please contact our sales team."
+    },
+    {
+      "name": "workspace",
+      "description": "Access to workspace related endpoints."
+    }
+  ]
+}

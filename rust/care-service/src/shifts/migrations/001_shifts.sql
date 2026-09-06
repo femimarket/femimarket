@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS care.shifts (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    client_id INT NOT NULL,
+    on_date DATE NOT NULL,
+    time_rule_id INT NOT NULL,
+    whitelist_id INT NULL,
+    blacklist_id INT NULL,
+    preference_id INT NULL,
+    double_up_id INT NULL,
+    roundsys_pk VARCHAR(255) NULL UNIQUE,
+    note VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    cancelled_note VARCHAR(255) NULL,
+    cancelled_at TIMESTAMP NULL,
+    FOREIGN KEY (client_id) REFERENCES care.clients (id),
+    FOREIGN KEY (time_rule_id) REFERENCES care.time_rules (id),
+    FOREIGN KEY (whitelist_id) REFERENCES care.whitelists (id),
+    FOREIGN KEY (blacklist_id) REFERENCES care.blacklists (id),
+    FOREIGN KEY (preference_id) REFERENCES care.preferences (id),
+    FOREIGN KEY (double_up_id) REFERENCES care.shifts (id),
+    FOREIGN KEY (user_id) REFERENCES care.users (id)
+) WITH SYSTEM VERSIONING;

@@ -1,0 +1,21 @@
+[package]
+name = "travel-service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sea-orm = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }
+chrono = { workspace = true }
+osm4routing = "0.8.0"
+petgraph = { version = "0.8", features = ["serde-1"] }
+rstar = { version = "0.13.0", features = ["serde"] }
+rayon = "1"
+serde = { workspace = true }
+bincode = "1"
+pathfinding = "4"
+geo = "0.33.1"
+gtfs-structures = "=0.47.0"
+vulture = "0.24"
+jiff = "0.2"

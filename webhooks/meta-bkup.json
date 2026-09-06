@@ -1,0 +1,182 @@
+[
+  {
+    "id": "read_xmp_original_document_id",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-XMP-xmpMM:OriginalDocumentID" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "read_xmp_genre",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-XMP-xmpDM:genre" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "read_xmp_lyrics",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-XMP-xmpDM:lyrics" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "read_xmp_rating",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-XMP-xmp:Rating" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "read_xmp_project_name",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-XMP-xmpDM:projectName" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "read_album",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-Album" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "write_album",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-overwrite_original" },
+      { "template": "-Album={{ .payload.value }}" },
+      { "source": "payload", "name": "file_path" }
+    ]
+  },
+  {
+    "id": "read_lyrics",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-UnsynchronizedLyrics" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "write_lyrics",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-overwrite_original" },
+      { "template": "-UnsynchronizedLyrics={{ .payload.value }}" },
+      { "source": "payload", "name": "file_path" }
+    ]
+  },
+  {
+    "id": "read_edited_lyrics",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-USLT-edited" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "write_edited_lyrics",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-overwrite_original" },
+      { "template": "-USLT-edited={{ .payload.text }}" },
+      { "source": "payload", "name": "file_path" }
+    ]
+  },
+  {
+    "id": "read_edited_synced_lyrics",
+    "execute-command": "kid3-cli",
+    "pass-arguments-to-command": [
+      { "string": "-c" },
+      { "string": "get SYLT:'edited'" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "write_edited_synced_lyrics",
+    "execute-command": "kid3-cli",
+    "pass-arguments-to-command": [
+      { "string": "-c" },
+      { "template": "set SYLT:'{{ .payload.lrc_path }}' 'edited'" },
+      { "source": "payload", "name": "file_path" }
+    ]
+  },
+  {
+    "id": "read_suno_clip_id",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-UserDefinedText" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "write_suno_clip_id",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-overwrite_original" },
+      { "template": "-UserDefinedText=suno_clip_id={{ .payload.value }}" },
+      { "source": "payload", "name": "file_path" }
+    ]
+  },
+  {
+    "id": "read_genre",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-Genre" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "write_genre",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-overwrite_original" },
+      { "template": "-Genre={{ .payload.value }}" },
+      { "source": "payload", "name": "file_path" }
+    ]
+  },
+  {
+    "id": "read_cover_bytes",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-Picture" },
+      { "string": "-b" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "read_picture_lead_artist_protagonist",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-j" },
+      { "string": "-Picture" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "write_picture_lead_artist_protagonist",
+    "execute-command": "exiftool",
+    "pass-arguments-to-command": [
+      { "string": "-overwrite_original" },
+      { "template": "-Picture={Type=Lead Artist,Description=protagonist,Data<={{ .payload.image_path }}" },
+      { "source": "payload", "name": "file_path" }
+    ]
+  }
+]

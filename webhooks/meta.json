@@ -1,0 +1,100 @@
+[
+  {
+    "id": "read_id3",
+    "execute-command": "/Users/u/.cargo/bin/cargo",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "r" },
+      { "source": "string", "name": "-q" },
+      { "source": "string", "name": "--manifest-path" },
+      { "source": "string", "name": "/Users/u/apps/femi/rust/id3-read/Cargo.toml" },
+      { "source": "string", "name": "--" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "read_xmp",
+    "execute-command": "/opt/homebrew/bin/exiftool",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "-j" },
+      { "source": "string", "name": "-XMP-xmpMM:OriginalDocumentID" },
+      { "source": "string", "name": "-XMP-xmpDM:genre" },
+      { "source": "string", "name": "-XMP-xmpDM:lyrics" },
+      { "source": "string", "name": "-XMP-xmpDM:projectName" },
+      { "source": "string", "name": "-XMP-xmp:Rating" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "write_edited_lyrics",
+    "execute-command": "/bin/sh",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "-c" },
+      { "source": "string", "name": "/opt/homebrew/bin/exiftool -overwrite_original \"-UnsynchronizedLyrics-edited=$1\" \"$2\"" },
+      { "source": "string", "name": "_" },
+      { "source": "payload", "name": "text" },
+      { "source": "payload", "name": "file_path" }
+    ]
+  },
+  {
+    "id": "write_sylt",
+    "execute-command": "/Users/u/.cargo/bin/cargo",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "r" },
+      { "source": "string", "name": "-q" },
+      { "source": "string", "name": "--manifest-path" },
+      { "source": "string", "name": "/Users/u/apps/femi/rust/id3-write-sylt/Cargo.toml" },
+      { "source": "string", "name": "--" },
+      { "source": "payload", "name": "content" },
+      { "source": "payload", "name": "filename" }
+    ]
+  },
+  {
+    "id": "write_protagonist_image",
+    "execute-command": "/bin/sh",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "-c" },
+      { "source": "string", "name": "kid3-cli -c \"set picture:'$2' 'Lead Artist' 'protagonist'\" \"$1\"" },
+      { "source": "string", "name": "_" },
+      { "source": "url", "name": "file" },
+      { "source": "url", "name": "image" }
+    ]
+  },
+  {
+    "id": "extract_cover_image",
+    "execute-command": "/Users/u/.cargo/bin/cargo",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "r" },
+      { "source": "string", "name": "-q" },
+      { "source": "string", "name": "--manifest-path" },
+      { "source": "string", "name": "/Users/u/apps/femi/rust/id3-extract-image/Cargo.toml" },
+      { "source": "string", "name": "--" },
+      { "source": "url", "name": "file" }
+    ]
+  },
+  {
+    "id": "extract_protagonist_image",
+    "execute-command": "/Users/u/.cargo/bin/cargo",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "include-command-output-in-response": true,
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "r" },
+      { "source": "string", "name": "-q" },
+      { "source": "string", "name": "--manifest-path" },
+      { "source": "string", "name": "/Users/u/apps/femi/rust/id3-extract-protagonist/Cargo.toml" },
+      { "source": "string", "name": "--" },
+      { "source": "url", "name": "file" }
+    ]
+  }
+]

@@ -1,0 +1,36 @@
+# Pins the exact Rust toolchain + rustup targets the whole workspace builds
+# against, so every machine/CI runner reproduces the same compiler without
+# hand-picking a drifting `stable`. Grounded in [BPD-RUST-02].
+#
+# channel: this machine already has rustc/cargo 1.94.1 installed. Edition-2024
+# safe (edition 2024 stabilized in Rust 1.85, Feb 2025; 1.94.1 is well above
+# that MSRV, so no separate MSRV notation is needed beyond this channel pin).
+#
+# targets: the 7 rustup targets the build exercises across metadata-core (the
+# SINGLE native crate — the former audio-engine was dissolved into it) + the
+# wasm-* web crates:
+#   - the 4 Android triples the .cargo/config.toml NDK linkers cover
+#     (arm64-v8a/armeabi-v7a/x86_64 are the shipped 3-ABI matrix per
+#     [ADVR3-01-AUDIOENGINE-ANDROID-ABI-PARITY]; i686 stays installed for
+#     historical/emulator parity but is NOT in the shipped ABI map),
+#   - the 2 iOS triples (device + simulator, Apple silicon),
+#   - wasm32 for the untouched wasm-pack web build.
+# The desktop HOST target is intentionally omitted: the host cargo build uses
+# the machine's default host triple (no --target), so it needs no entry here.
+#
+# NOTE: `cbindgen` and `wasm-pack` are cargo SUBCOMMAND TOOLS, not toolchain
+# components, so they are not expressible here — pin them out-of-band
+# (`cargo install cbindgen --version 0.29.4 --locked`; `wasm-pack` via the npm
+# devDependency `npx wasm-pack` already resolves).
+[toolchain]
+channel = "1.94.1"
+targets = [
+    "aarch64-linux-android",
+    "armv7-linux-androideabi",
+    "x86_64-linux-android",
+    "i686-linux-android",
+    "aarch64-apple-ios",
+    "aarch64-apple-ios-sim",
+    "wasm32-unknown-unknown",
+]
+components = ["rustfmt", "clippy"]

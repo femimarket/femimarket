@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS music.videos (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    line_id INT NOT NULL,
+    model ENUM('veo31', 'unknown') NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    raw VARCHAR(255) NOT NULL,
+    prompt VARCHAR(255) NULL,
+    start_ms DOUBLE NOT NULL,
+    end_ms DOUBLE NOT NULL,
+    duration_ms DOUBLE NOT NULL,
+    speed BIGINT NOT NULL,
+    width INT NOT NULL,
+    height INT NOT NULL,
+    export BOOLEAN NOT NULL,
+    selected BOOLEAN NOT NULL,
+    sort INT NULL,
+    lane INT NOT NULL,
+    timeline_disabled BOOLEAN NOT NULL,
+    timeline_duration_ms DOUBLE NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (line_id) REFERENCES music.lines (id)
+);

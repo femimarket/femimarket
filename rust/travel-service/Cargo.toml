@@ -1,0 +1,28 @@
+[package]
+name = "travel-service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sea-orm = { workspace = true }
+mysql_async = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+rstar = "0.13.0"
+rayon = "1"
+serde = { workspace = true }
+serde_json = { workspace = true }
+bincode = "1"
+gtfs-structures = "=0.47.0"
+vulture = "0.24"
+jiff = "0.2"
+valhalla = "0.6"
+motis-service = { path = "../motis-service" }
+zip = { workspace = true }
+csv = { workspace = true }
+axum = { workspace = true }
+tower-http = { workspace = true }
+clap-verbosity-flag = { workspace = true }
+tracing = { version = "0.1.41" }
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }

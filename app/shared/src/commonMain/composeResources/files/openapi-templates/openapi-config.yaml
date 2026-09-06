@@ -1,0 +1,13 @@
+# openapi-generator config file. Referenced from build.sh via `-c` and from
+# femi/shared/build.gradle.kts via `configFile.set(...)`. The `files:` block
+# below is a 5.0.0+ feature that adds new supporting-file outputs without a
+# custom Java generator class — the template lives beside the standard
+# multiplatform-library templates in libraries/multiplatform/, and the
+# `folder` field routes its output to a webMain source-set path that
+# femi/shared/build.gradle.kts wires into `webMain.kotlin.srcDir(...)`.
+
+files:
+  WebMultipartStreaming.kt.mustache:
+    folder: src/webMain/kotlin/market/femi/api/infrastructure
+    destinationFilename: WebMultipartStreaming.kt
+    templateType: SupportingFiles

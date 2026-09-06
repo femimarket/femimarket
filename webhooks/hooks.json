@@ -1,0 +1,36 @@
+[
+  {
+    "id": "extract-rgba",
+    "execute-command": "ffmpeg",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "-i" },
+      { "source": "payload", "name": "input_file" },
+      { "source": "string", "name": "-f" },
+      { "source": "string", "name": "rawvideo" },
+      { "source": "string", "name": "-pix_fmt" },
+      { "source": "string", "name": "rgba" },
+      { "source": "string", "name": "-y" },
+      { "source": "payload", "name": "output_file" }
+    ]
+  },
+  {
+    "id": "decode-pcm",
+    "execute-command": "ffmpeg",
+    "command-working-directory": "/Users/u/dbapps/femi/dufs",
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "-i" },
+      { "source": "payload", "name": "input_file" },
+      { "source": "string", "name": "-f" },
+      { "source": "string", "name": "s16le" },
+      { "source": "string", "name": "-acodec" },
+      { "source": "string", "name": "pcm_s16le" },
+      { "source": "string", "name": "-ar" },
+      { "source": "string", "name": "16000" },
+      { "source": "string", "name": "-ac" },
+      { "source": "string", "name": "1" },
+      { "source": "string", "name": "-y" },
+      { "source": "payload", "name": "output_file" }
+    ]
+  }
+]

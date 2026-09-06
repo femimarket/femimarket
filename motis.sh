@@ -1,0 +1,1 @@
+cd rust && openapi-generator generate -i https://raw.githubusercontent.com/motis-project/motis/master/openapi.yaml -g rust -o ./motis-service --additional-properties=packageName=motis-service,reqwestLibrary=reqwest-async && perl -pi -e 's/models::models::/models::/g; s/\("time", &param_value\.to_string\(\)\)/("time", &param_value.to_rfc3339())/g' ./motis-service/src/apis/*.rs

@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS care.transport_modes (
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    note VARCHAR(255) NOT NULL
+);

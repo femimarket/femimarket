@@ -1,0 +1,90 @@
+[fs]
+dir = "$HOME/dbapps/femi/dufs"
+cmd = "dufs -A -p 9002 -b 0.0.0.0 -b ::"
+
+[surreal]
+dir = "$HOME/dbapps/femi/surrealdb"
+cmd = "surreal start -b 0.0.0.0:9003 surrealkv://femi-db --unauthenticated"
+
+[db]
+cmd = "couchdb"
+
+[postgres]
+cmd = "postgres -D $HOME/dbapps/femi/postgres/"
+
+[mariadb]
+cmd = "mariadbd --datadir=$HOME/dbapps/femi/mariadb/"
+
+[codec]
+dir = "$HOME/apps/femi/webhooks"
+cmd = "webhook -hooks codec.json -port 9004 -verbose"
+
+[meta]
+dir = "$HOME/apps/femi/rust"
+cmd = "cargo r -r -p meta-service -- $HOME/dbapps/femi/dufs --port 9005"
+
+[music]
+dir = "$HOME/apps/femi/rust/music-service"
+env = { PORT = "9000", RUST_LOG = "info" }
+cmd = "cargo r -r -p music-service -- --fs-url $HOME/dbapps/femi/dufs serve --web-dir $HOME/swiftapps/femi/Kmp/webApp/build/dist/wasmJs/productionExecutable --alibaba-studio-api your-alibaba-studio-api-key --alibaba-studio-base https://your-alibaba-endpoint.aliyuncs.com/compatible-mode/v1 --fal-key your-fal-key-id:your-fal-key-secret --comfy-key your-comfyui-api-key --ngrok-ai your-ngrok-auth-token --ngrok-ai-url https://your-ngrok-subdomain.ngrok-free.app --comfy-ltx2-3a2v-workflow $HOME/comfyuiapps/femi/ltx23a2v.json --comfy-flux2-klein-i2i-workflow $HOME/comfyuiapps/femi/image_flux2_klein_image_edit_4b_base.json --comfy-flux2-dev-i2i-workflow $HOME/comfyuiapps/femi/flux2_dev_i2i.json --sslpub $HOME/sslapps/femi/cert.pem --sslpriv $HOME/sslapps/femi/key.pem --qwen-asr-0-6b-dir $HOME/business/_bin/qwen-aligner"
+
+[care]
+dir = "$HOME/apps/femi/rust"
+env = { RUST_LOG = "info", TRAVEL_URL = "https://femi.market/api/travel" }
+cmd = "cargo r -r -p care-service -- serve --port 9010"
+
+[motis]
+dir = "$HOME/capps/motis-project"
+cmd = "./motis server"
+
+[travel]
+dir = "$HOME/apps/femi/rust"
+env = { RUST_LOG = "info", MOTIS_URL = "https://femi.market/api/motis" }
+cmd = "cargo r -r -p travel-service -- --database-url mysql://u:abc123@localhost/care serve --port 9012"
+
+[match]
+dir = "$HOME/apps/femi/rust"
+env = { RUST_LOG = "info" }
+cmd = "cargo r -r -p match-service -- --database-url mysql://u:abc123@localhost/match serve --port 9013"
+
+[ui]
+dir = "$HOME/apps/femi/rust"
+env = { RUST_LOG = "info" }
+cmd = "cargo r -r -p ui-service -- --database-url mysql://u:abc123@localhost/ui serve --port 9014"
+
+[matrix]
+dir = "$HOME/apps/femi/rust"
+env = { RUST_LOG = "info" }
+cmd = "cargo r -r -p matrix-service -- serve --port 9015"
+
+[localisation]
+dir = "$HOME/apps/femi/rust"
+env = { RUST_LOG = "info" }
+cmd = "cargo r -r -p localisation-service -- --database-url mysql://u:abc123@localhost/localisation serve --port 9016"
+
+# not needed
+[spring]
+dir = "$HOME/htmlapps/springcarerecruitment.com"
+cmd = "npm start"
+
+# not needed
+[remittance]
+dir = "$HOME/apps/remittance"
+cmd = "./gradlew jsBrowserDevelopmentRun"
+
+# not needed
+[jobs]
+dir = "$HOME/pythonapps/rota2"
+env = { FEMI_ADMIN_PASSWORD = "CHANGE_ME" }
+cmd = "uv run uvicorn app:app --port 9009"
+
+# not needed
+[kotlin-job]
+dir = "$HOME/pythonapps/kotlin-job"
+env = { PORT = "9017" }
+cmd = "python3 server.py"
+
+# not needed
+[timesheet]
+dir = "$HOME/jsapps/timesheet"
+cmd = "npm start -- --port 9008 -H 0.0.0.0"

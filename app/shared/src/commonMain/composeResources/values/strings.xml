@@ -1,0 +1,291 @@
+<!--
+  The ONE localization surface for the shared Compose UI (UIUX-PLAN §1.4 / §4.6.4 D6 re-scope):
+  English source values for EVERY UiEffect variant and all steps-1-8 chrome. The VM/contract layer
+  stays display-text-free (D5/D6); this file plus ui/UiEffectMessages.kt are the sanctioned home of
+  user-facing text in commonMain. compose-resources resolves the locale natively per platform
+  (iOS rides the 1.12-beta02 NSLocale integration), so this single file serves desktop/android/ios
+  (and the web plan) without per-platform strings.xml / String Catalog / web-i18n triplication.
+
+  Conventions:
+  - Positional format args (%1$s / %1$d), resolved via the suspend getString(Res.string.…, args).
+  - Singular/plural pairs are explicit *_one / *_other string pairs picked in the exhaustive `when`
+    (UiEffectMessages.kt), mirroring the count == 1 branch of the retired App.kt toDisplayMessage().
+  - Semantic-key effects (JobFailed / OperationFailed) get one localized template PER KNOWN KEY plus
+    a generic fallback: raw developer keys ("VeoAsyncJob", "editWordAlignment") never reach the user.
+  - Staged status labels are honest stage descriptions, never fake percentages (UIUX-PLAN §1.6/§2.5).
+  - Import copy is media-neutral by design (E4/E5): "Import directory", never "audio importer", and
+    no promise of video/image ingest, because the mp4 import arm is commented out (WVM:256-258) and
+    the png arm is empty (WVM:260-261) — the copy must not advertise what the pipeline does not do.
+-->
+<resources>
+
+    <!-- ═══════════ UiEffect messages (the exhaustive mapping in ui/UiEffectMessages.kt) ═══════════ -->
+
+    <!-- UiEffect.TracksImported(count): import succeeded; singular/plural pair on count. -->
+    <string name="effect_tracks_imported_one">Imported 1 track.</string>
+    <string name="effect_tracks_imported_other">Imported %1$d tracks.</string>
+
+    <!-- UiEffect.MissingCoverArt(file): an mp3 without embedded cover art was skipped; arg = filename. -->
+    <string name="effect_missing_cover_art">No cover art found in %1$s.</string>
+
+    <!-- UiEffect.LyricsAligned(wordCount): forced alignment produced word timings; pair on wordCount. -->
+    <string name="effect_lyrics_aligned_one">Aligned 1 word.</string>
+    <string name="effect_lyrics_aligned_other">Aligned %1$d words.</string>
+
+    <!-- UiEffect.ClipsAdded(count): a generation/mux job landed new video clips; pair on count. -->
+    <string name="effect_clips_added_one">Added 1 clip.</string>
+    <string name="effect_clips_added_other">Added %1$d clips.</string>
+
+    <!-- UiEffect.ImagesAdded(count): an image-gen job landed new storyboard frames; pair on count. -->
+    <string name="effect_images_added_one">Added 1 image.</string>
+    <string name="effect_images_added_other">Added %1$d images.</string>
+
+    <!--
+      UiEffect.JobFailed(job): `job` is the SEMANTIC job-kind key (the BackgroundAsyncJob class
+      simpleName, JobsViewModel:51). One localized template per known kind; the generic fallback
+      covers future kinds without ever surfacing a class name to the user.
+    -->
+    <string name="effect_job_failed_image_generation">Image generation failed.</string>
+    <string name="effect_job_failed_clip_generation">Clip generation failed.</string>
+    <string name="effect_job_failed_final_cut">Stitching the final cut failed.</string>
+    <string name="effect_job_failed_generic">A background job failed.</string>
+
+    <!--
+      UiEffect.Download(name): routed to LocalDownloadHandler, NOT the snackbar queue (§1.4); the
+      string still exists so the mapping stays total, and shells that surface a post-save
+      confirmation use this copy. Arg = the exported file name.
+    -->
+    <string name="effect_download_ready">Downloaded %1$s.</string>
+
+    <!--
+      UiEffect.OperationFailed(operation): `operation` is the SEMANTIC intent key emitted by
+      WorkspaceViewModel ("import" :271, "align" :304, "commit" :331, "protagonist" :416,
+      "editWordAlignment" :459, "export" :749). One localized template per known key; generic
+      fallback for future keys — raw keys never render.
+    -->
+    <string name="effect_operation_failed_import">Import failed.</string>
+    <string name="effect_operation_failed_align">Alignment failed.</string>
+    <string name="effect_operation_failed_commit_lyrics">Saving lyrics failed.</string>
+    <string name="effect_operation_failed_protagonist">Saving your cast pick failed.</string>
+    <string name="effect_operation_failed_word_alignment">Saving word timing failed.</string>
+    <string name="effect_operation_failed_export">Export failed.</string>
+    <!--
+      The ~9 new SEMANTIC OperationFailed keys recorded by the webMain→all-platforms port (ANCHOR
+      vm-delta §1.1). Their emitting intents land in M1 (connectDirectory/setLoop/commitTrimChange/
+      setExportClip/deleteMedia/commitAbout/generateAboutSummary/generateAboutQuestions); the templates
+      exist now so no key can be dropped and the exhaustive mapping stays honest. storyboardAboutRequired
+      is a deferred-emit gate (editabout-05) recorded ahead of the runStoryboard expand pipeline.
+    -->
+    <string name="effect_operation_failed_connect_directory">Connecting the folder failed.</string>
+    <string name="effect_operation_failed_loop_region">That loop region isn't valid.</string>
+    <string name="effect_operation_failed_trim_video">Saving the trim failed.</string>
+    <string name="effect_operation_failed_set_export">Setting the export clip failed.</string>
+    <string name="effect_operation_failed_delete">Deleting failed.</string>
+    <string name="effect_operation_failed_about">Saving the about failed.</string>
+    <string name="effect_operation_failed_generate_about">Generating the about summary failed.</string>
+    <string name="effect_operation_failed_generate_about_questions">Generating the about questions failed.</string>
+    <string name="effect_operation_failed_storyboard_about_required">Fill in the about first.</string>
+    <string name="effect_operation_failed_generic">Operation failed.</string>
+
+    <!--
+      UiEffect.DirectoryConnected(name) (Parity Ledger ROW 7): a folder was (re)connected via
+      connectDirectory / restoreDirectory; arg = the connected folder name. Localizes webMain's
+      "Directory Connected!" snackbar.
+    -->
+    <string name="effect_directory_connected">Connected folder: %1$s.</string>
+
+    <!-- ═══════════ Navigation destinations (NavigationSuiteScaffold / pane scaffold, §1.2) ═══════════ -->
+
+    <string name="destination_library">Library</string>
+    <string name="destination_studio">Studio</string>
+    <string name="destination_production">Production</string>
+
+    <!-- Journey Rail phase chip labels (UIUX-PLAN §1.3): the 13 journey steps compressed to six
+         phases. These are chrome strings — the sanctioned commonMain localization surface is this
+         compose-resources strings.xml (UIUX-PLAN §1.4 / §4.6.4). -->
+    <string name="phase_source">Source</string>
+    <string name="phase_words">Words</string>
+    <string name="phase_cast">Cast</string>
+    <string name="phase_storyboard">Storyboard</string>
+    <string name="phase_cut">Cut</string>
+    <string name="phase_export">Export</string>
+
+    <!-- ═══════════ Step 1 — Import (Library pane, §2 step 1) ═══════════ -->
+
+    <!-- Media-neutral primary CTA (E4/E5 — survives future mp4/png import arms without a rename). -->
+    <string name="import_directory_button">Import directory</string>
+    <!-- Staged label beside the LoadingIndicator while isImporting — a stage, never a percent. -->
+    <string name="importing_in_progress">Importing…</string>
+    <!-- Empty-state hero card (plan-quoted copy); body stays media-neutral — no ingest promises. -->
+    <string name="library_empty_title">No audios yet</string>
+    <string name="library_empty_body">Import a directory to get started.</string>
+
+    <!-- ═══════════ Step 2 — Select (track cards, §2 step 2) ═══════════ -->
+
+    <!-- Content description for a track card cover thumbnail (rendered via mediaUrl, §4.2). -->
+    <string name="cover_art_content_description">Cover art</string>
+    <!-- Project line on the active-track header; arg = projectName. -->
+    <string name="project_label">Project: %1$s</string>
+
+    <!-- ═══════════ Steps 3-5 — Lyrics section (Studio pane, §2 steps 3-5) ═══════════ -->
+
+    <string name="lyrics_section_title">Lyrics</string>
+    <string name="lyrics_commit_button">Commit</string>
+    <string name="lyrics_align_button">Align</string>
+    <!-- Content description of the section-header dot shown while lyricsDraft != null. -->
+    <string name="lyrics_unsaved_draft">Unsaved draft</string>
+    <!-- Staged label while isAligning (§2 step 4 — plan-quoted copy). -->
+    <string name="aligning_words_in_progress">Aligning words…</string>
+    <!-- Aligned-line-count chip reading audioLines.size (§2 step 4); explicit singular/plural pair. -->
+    <string name="aligned_line_count_one">1 aligned line</string>
+    <string name="aligned_line_count_other">%1$d aligned lines</string>
+    <!-- Shared staged label for the brief per-op savers (isSavingLyrics/isSavingAlignment/isSavingProtagonist). -->
+    <string name="saving_in_progress">Saving…</string>
+
+    <!-- ═══════════ Steps 6-7 — Word timing section (§2 steps 6-7) ═══════════ -->
+
+    <string name="word_timing_section_title">Word timing</string>
+    <!-- Per-row audition transport content descriptions (play → playWord(index), pause → pausePlayback()). -->
+    <string name="play_word_content_description">Play word</string>
+    <string name="pause_playback_content_description">Pause playback</string>
+    <!-- Slider content descriptions: RangeSlider = in/out independently; shift = both ends, duration kept. -->
+    <string name="word_range_slider_content_description">Word start and end</string>
+    <string name="word_shift_slider_content_description">Shift word timing</string>
+
+    <!-- ═══════════ Step 8 — Cast section (§2 step 8) ═══════════ -->
+
+    <!-- Empty-state card shown while activeAudio.protagonist == null (plan-quoted copy). -->
+    <string name="cast_empty_title">Pick your cast</string>
+    <!-- pickProtagonist() — the TYPED files.pickImages() picker (C14/F7: the pick IS the picker). -->
+    <string name="cast_pick_image_button">Pick image</string>
+    <!-- Draft actions: commitProtagonist(audioId) / editProtagonistDraft(null) — cancel drops the draft. -->
+    <string name="cast_commit_button">Commit</string>
+    <string name="cast_cancel_button">Cancel</string>
+    <!-- Content descriptions for the committed image and the pending (uncommitted) draft preview. -->
+    <string name="cast_committed_image_content_description">Committed cast image</string>
+    <string name="cast_draft_preview_content_description">Pending cast image</string>
+
+    <!-- Production pane chrome + staged job label (UIUX-PLAN §4.1 item 8, §1.6). The job label is
+         the UI-resolved staged status string keyed on semantic job state (jobs.isRunning) — it
+         deliberately does NOT read jobs.statusText, which is an always-empty placeholder; per-kind
+         labels ("Stitching final cut…") arrive with the steps-9-13 slices once the A7-gated
+         semantic job-phase handle exists (UIUX-PLAN §4.2 recorded futures). -->
+    <string name="production_clips_header">Clips</string>
+    <string name="production_frames_header">Frames</string>
+    <string name="production_empty">Nothing produced yet — generated frames and clips will appear here.</string>
+    <string name="production_job_running">Generating media…</string>
+
+    <!-- ═══════════ Desktop shell chrome (window title + MenuBar, §3.1) ═══════════ -->
+
+    <string name="app_title">Studio Femi Market</string>
+    <string name="menu_file">File</string>
+    <!-- MenuBar item (File → Import directory…) — same media-neutral wording as the CTA. -->
+    <string name="menu_import_directory">1. Import directory</string>
+    <string name="menu_setup">0. Setup</string>
+    <string name="menu_select_audio">2. Select Song</string>
+    <string name="menu_lyrics">Lyrics</string>
+    <string name="menu_lines">Lines</string>
+    <string name="menu_about_faqs">FAQs</string>
+    <string name="menu_about_storyboard">Social Media Blueprint</string>
+    <string name="setup_dialog_title">Database &amp; Storage Setup</string>
+    <string name="setup_dialog_fs_url_label">File Storage URL (Dufs)</string>
+    <string name="setup_dialog_fs_url_support">The media library — a dufs server (github.com/sigoden/dufs).</string>
+    <string name="setup_dialog_db_url_support">Record storage — a CouchDB server.</string>
+    <string name="setup_dialog_codec_url_support">Media conversion. Works on files already in the file store.</string>
+    <string name="setup_dialog_meta_url_support">id3/xmp metadata, via rust + webhook. Works on files already in the file store.</string>
+    <string name="setup_dialog_db_url_label">Database URL (SurrealDB)</string>
+    <string name="setup_dialog_db_username_label">Database Username</string>
+    <string name="setup_dialog_db_pass_label">Database Password</string>
+    <string name="setup_dialog_codec_url_label">Codec Webhook URL (FFmpeg)</string>
+    <string name="setup_dialog_meta_url_label">Meta Webhook URL (id3/xmp)</string>
+    <string name="setup_dialog_done_button">Done</string>
+
+    <string name="music_videos">Music Videos</string>
+    <string name="splash_care">Care Jobs</string>
+    <string name="splash_match">Match</string>
+    <string name="splash_money">Money</string>
+    <string name="splash_tech">Tech</string>
+    <string name="splash_setup">Setup</string>
+
+    <string name="full_company_name">OBAFEMI</string>
+    <string name="header_settings">Settings</string>
+    <string name="company_footer">EARN $FEMI LTD · Company No. SC604284 · Registered in Scotland · 63 Dunnock House, Dunnock Road, Dunfermline, KY11 8QE</string>
+
+    <string name="music_info_what_title">What this is</string>
+    <string name="music_info_what">This app is for making a music video for your song. It guides you through every part and teaches you what you need as you go. You don't need any video experience. It is built so the video comes out high quality and the way you imagined it.</string>
+    <string name="music_info_why_title">The why</string>
+    <string name="music_info_why">This app exists because I wanted music videos of my own, and a proper one costs a lot, needs a lot of people, and can still go wrong. AI made another way possible. I worked that way out for myself and turned it into this app.</string>
+    <string name="music_info_belief_title">The belief</string>
+    <string name="music_info_belief">AI has changed what one person can do. My background is IT, and I used it to build something that does not exist anywhere else.\n\nIf you want to tell your story and have it come out exactly as you mean it. That is what this is about.</string>
+    <string name="music_info_goal_title">The goal</string>
+    <string name="music_info_goal">The goal is to make the best music videos, tell your story with them, and put them out for the world to see.</string>
+    <string name="music_info_service_title">Service and cost</string>
+    <string name="music_info_service">The app costs nothing. It runs on my own servers and I only have so much capacity. Sometimes it will be slow. Sometimes it will fail. If you want fast and reliable, there are paid options.</string>
+    <string name="music_info_enter">Enter</string>
+
+    <string name="care_login_what_title">What this is</string>
+    <string name="care_login_what">This is a multiplatform domicilary care software. It runs on desktop, mobile and web. It makes running domiciliary care simple and efficient. You don't need clinical expertise to use this tool. It's designed to be easy to use and simple.</string>
+    <string name="care_login_why_title">The why</string>
+    <string name="care_login_why">I supported the technical operations of a domiciliary care company and saw inefficient processes everywhere. I solved each independently before eventually deciding to turn into all to a full system.</string>
+    <string name="care_login_belief_title">The belief</string>
+    <string name="care_login_belief">My background is in IT and I used technology to make things easier. Providing care and supporting people shouldn't be something made inconvenient because of inefficient processes that technology can solve. If it can be better, then I'd like to see it become a reality</string>
+    <string name="care_login_goal_title">The goal</string>
+    <string name="care_login_goal">Make running a homecare business through modern technology an extremely easy convenient operation.</string>
+    <string name="care_login_service_title">Service and cost</string>
+    <string name="care_login_service">You run it on your own servers, which makes it free. You can also use this as is for a test drive.</string>
+    <string name="care_login_how_title">How to use</string>
+    <string name="care_login_how">To use this, you need to login via matrix.</string>
+    <string name="care_login_enter">Login</string>
+
+    <string name="music_select_import_title">Import Songs</string>
+    <string name="music_select_title">Search Audio by Lyrics</string>
+    <string name="music_nav_servers">Servers</string>
+    <string name="care_nav_rules">Rules</string>
+    <string name="care_nav_servers">Servers</string>
+    <string name="care_nav_rota">Rota</string>
+    <string name="care_nav_account">Account</string>
+    <string name="care_nav_availability">Availability</string>
+    <string name="care_nav_tasks">Tasks</string>
+    <string name="care_nav_jobs">Jobs</string>
+    <string name="care_account_staffs">Staffs</string>
+    <string name="care_account_service_users">Service users</string>
+    <string name="music_nav_songs">Songs</string>
+    <string name="music_nav_studio">Studio</string>
+    <string name="music_nav_explore">Explore</string>
+    <string name="music_nav_you">You</string>
+
+    <string name="login_title">Sign in</string>
+    <string name="settings_legal">Legal</string>
+    <string name="login_desc">You sign in on the web. The app gives you a code to type there.</string>
+    <string name="login_start">Get a code</string>
+    <string name="login_code_title">Your code</string>
+    <string name="login_code_desc">Open the page and enter this code. The app waits here until you are done.</string>
+    <string name="login_open">Open the sign in page</string>
+
+    <string name="music_setup_intro">Point to any compatible music servers of your choice. Use the free defaults, host your own or use a paid server for more reliability.</string>
+    <string name="music_themes_meaning_title">What does your line mean?</string>
+    <string name="music_themes_context_label">Context</string>
+    <string name="music_themes_context_placeholder">Jump and touch a star</string>
+    <string name="music_themes_context_support">What this line means</string>
+    <string name="music_themes_goal_label">Goal</string>
+    <string name="music_themes_goal_placeholder">Reaching success</string>
+    <string name="music_themes_goal_support">The point line communicates</string>
+    <string name="music_themes_meaning">What does this line mean and in what context do you mean? We are being very granular. This how you will end up with videos you actually like accurate to your point. Making a great music video is really just about how accurate are you with what you mean - that's it.</string>
+    <string name="music_setup_fs_title">File System</string>
+    <string name="music_setup_fs">Dufs File Server</string>
+    <string name="music_setup_fs_link">Visit Dufs site</string>
+    <string name="music_setup_db_title">Database</string>
+    <string name="music_setup_db">CouchDB database</string>
+    <string name="music_setup_db_link">Visit CouchDB site</string>
+    <string name="music_setup_codec_title">Codec Service</string>
+    <string name="music_setup_codec">Closed source. For now, must use this server.</string>
+    <string name="music_setup_meta_title">Meta Service</string>
+    <string name="music_setup_meta">Closed source. For now must use this server.</string>
+    <string name="music_select_search">Search your songs by lyrics because when you have a lot of songs, a lot of takes and version etc. Going by lyrics is the faster than remembering file names. But your songs must have lyrics embedded in them.</string>
+    <string name="music_select_import">You can import your songs from the server.</string>
+    <string name="music_select_servers">More information about servers here</string>
+    <string name="music_select_add_song">Add Song</string>
+    <string name="music_select_results_title">Select Song</string>
+    <string name="music_select_results">Select the song, music plays so you can check it's the right take and you're good to go.</string>
+
+</resources>

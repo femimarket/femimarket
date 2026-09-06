@@ -1,0 +1,39 @@
+#[package]
+#name = "rust"
+#version = "0.1.0"
+#edition = "2024"
+#
+#[dependencies]
+[workspace]
+resolver = "3"
+members = ["id3-write-protagonist", "id3-extract-image", "id3-extract-protagonist", "id3-write-sylt", "id3-read", "fal-z-image-turbo", "music-service", "meta-service", "care-service", "chat-service", "travel-service", "motis-service", "match-service", "ui-service", "matrix-service", "matrix-service/client", "localisation-service"]
+
+
+[workspace.dependencies]
+futures = "0.3"
+id3 = "1.16"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_path_to_error = { version = "=0.1.20" }
+infer = { version = "0.19.0", default-features = false }
+xmpkit = { version = "0.1.0", features = ["wasm"] }
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4.5.53", features = ["derive", "env"] }
+clap-verbosity-flag = {version = "3.0.4", features = ["tracing"]}
+axum = "0.8"
+axum-extra = { version = "0.10", features = ["typed-header"] }
+url = "2.5.8"
+mysql_async = { version = "0.37.1", features = ["chrono"] }
+uuid = { version = "1", features = ["v4"] }
+tower-http = { version = "0.6", features = ["cors"] }
+utoipa = { version = "5", features = ["axum_extras", "chrono"] }
+utoipa-swagger-ui = { version = "9", features = ["axum"] }
+tower = { version = "0.5", features = ["limit"] }
+matrix-sdk = "0.18"
+sea-orm = { version = "2", features = ["sqlx-mysql", "runtime-tokio-rustls", "macros", "with-chrono", "schema-sync", "entity-registry"] }
+chrono = "0.4"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+serde_urlencoded = "0.7"
+zip = "6"
+csv = "1"
+cp_sat = "0.4"

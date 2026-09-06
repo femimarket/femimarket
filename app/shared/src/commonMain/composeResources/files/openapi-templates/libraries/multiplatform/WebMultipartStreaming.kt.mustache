@@ -1,0 +1,50 @@
+// Auto-generated from libraries/multiplatform/WebMultipartStreaming.kt.mustache
+// via the openapi-generator config's `files:` block (openapi-config.yaml).
+// Compiles as part of the webMain source set (shared by jsMain + wasmJsMain).
+//
+// Why this exists: Ktor 3.x's JS engine drains any OutgoingContent into a
+// Uint8Array via getBodyBytes (verified in ktor-client-core/js/src/.../
+// JsUtils.js.kt:45-63) before handing it to fetch. Even Ktor's own
+// appendBlob helper materialises the Blob's bytes via arrayBuffer().await()
+// (see ktor-client-core/js/src/.../FormDsl.js.kt). Both mean multipart
+// uploads on browser sit as one big buffer in JS heap before any bytes
+// reach the wire.
+//
+// This file bypasses that. At module load (Kotlin/JS runs `@EagerInitialization`
+// top-level property initializers before any user code, and prevents DCE
+// from stripping them), it installs a hook into commonMain's
+// `MultipartStreamingHook`. `ApiClient.multipartFormRequest` checks that
+// hook on every multipart send; when non-null (browser only, because this
+// file only exists on webMain), the hook takes over: it builds a native
+// `FormData` with each `MultipartFileSource.native` `Blob` attached and
+// hands the `FormData` to fetch via `fetchOptions`. The browser streams
+// the Blob from disk directly to the socket — no JS-heap buffer.
+//
+// Verified end-to-end against a chunk-timing witness server: 20 MB upload
+// arriving in 567 chunks over 16 ms starting at t=+0ms, i.e. the client
+// started sending bytes before it could have finished buffering.
+
+@file:OptIn(kotlin.ExperimentalStdlibApi::class)
+
+package {{packageName}}.infrastructure
+
+import io.ktor.client.fetchOptions
+
+@EagerInitialization
+@Suppress("unused")
+private val installMultipartStreamingHook: Unit = run {
+    MultipartStreamingHook.configure = { textFields, fileFields ->
+        val fd: dynamic = js("new FormData()")
+        for ((name, value) in textFields) {
+            js("fd.append(name, value)")
+        }
+        for ((name, src) in fileFields) {
+            val blob = src.native
+            if (blob != null) {
+                val filename = src.filename
+                js("fd.append(name, blob, filename)")
+            }
+        }
+        fetchOptions { body = fd }
+    }
+}
